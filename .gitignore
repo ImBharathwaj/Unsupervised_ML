@@ -1,3 +1,5 @@
+/synth-data/__pycache__/
+/synth-data/output/
 *.class
 *.tasty
 *.log

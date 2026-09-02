@@ -1,0 +1,703 @@
+{
+  "project": {
+    "name": "Stitch Financial CDP",
+    "version": "1.0",
+    "purpose": "Synthetic financial customer data platform for marketing, customer 360, loan propensity, insurance opportunity detection and financial relationship analytics",
+    "data_is_synthetic": true
+  },
+
+  "generation": {
+    "batch": {
+      "description": "Relatively static or periodically refreshed datasets generated as files and ingested through HDFS/Spark/Airflow",
+      "formats": ["json", "csv", "parquet"],
+      "recommended_frequency": [
+        "daily",
+        "weekly",
+        "monthly"
+      ]
+    },
+    "streaming": {
+      "description": "Continuously changing behavioral, transaction and operational events generated into Kafka/Redpanda",
+      "format": "json",
+      "transport": "kafka",
+      "recommended_rate": "10-100 events/sec"
+    }
+  },
+
+  "datasets": {
+
+    "batch": {
+
+      "customers": {
+        "description": "Canonical synthetic customer master data",
+        "storage": "HDFS",
+        "format": "parquet",
+        "partition_by": ["country", "registration_date"],
+        "schema": {
+          "customer_id": "string",
+          "first_name": "string",
+          "middle_name": "string|null",
+          "last_name": "string",
+          "date_of_birth": "date",
+          "gender": "string",
+          "email": "string",
+          "phone": "string",
+          "alternate_phone": "string|null",
+          "address_line_1": "string",
+          "address_line_2": "string|null",
+          "city": "string",
+          "state": "string|null",
+          "postal_code": "string",
+          "country": "string",
+          "nationality": "string",
+          "occupation": "string",
+          "employment_type": "string",
+          "employer_name": "string|null",
+          "annual_income": "decimal",
+          "income_currency": "string",
+          "marital_status": "string|null",
+          "number_of_dependents": "integer",
+          "customer_segment": "string|null",
+          "customer_status": "string",
+          "registration_date": "timestamp",
+          "last_updated_at": "timestamp"
+        }
+      },
+
+      "customer_identifiers": {
+        "description": "Identifiers coming from different source systems for identity resolution",
+        "storage": "HDFS",
+        "format": "json",
+        "schema": {
+          "identifier_id": "string",
+          "customer_id": "string",
+          "source_system": "string",
+          "identifier_type": "string",
+          "identifier_value": "string",
+          "is_primary": "boolean",
+          "verified": "boolean",
+          "created_at": "timestamp",
+          "updated_at": "timestamp"
+        }
+      },
+
+      "credit_profiles": {
+        "description": "Synthetic credit bureau profiles",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "credit_profile_id": "string",
+          "customer_id": "string",
+          "bureau": "string",
+          "bureau_customer_id": "string",
+          "credit_score": "integer",
+          "score_band": "string",
+          "credit_history_months": "integer",
+          "total_credit_accounts": "integer",
+          "active_credit_accounts": "integer",
+          "closed_credit_accounts": "integer",
+          "total_credit_limit": "decimal",
+          "total_outstanding": "decimal",
+          "credit_utilization_ratio": "decimal",
+          "total_monthly_emi": "decimal",
+          "secured_loan_count": "integer",
+          "unsecured_loan_count": "integer",
+          "credit_card_count": "integer",
+          "delinquency_count": "integer",
+          "max_days_past_due": "integer",
+          "write_off_count": "integer",
+          "settled_account_count": "integer",
+          "recent_credit_enquiries": "integer",
+          "last_enquiry_date": "date|null",
+          "report_date": "date",
+          "created_at": "timestamp"
+        }
+      },
+
+      "credit_accounts": {
+        "description": "Individual credit accounts reported by bureaus",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "credit_account_id": "string",
+          "customer_id": "string",
+          "bureau": "string",
+          "bureau_account_id": "string",
+          "lender_id": "string",
+          "account_type": "string",
+          "account_status": "string",
+          "ownership_type": "string",
+          "sanctioned_amount": "decimal",
+          "credit_limit": "decimal|null",
+          "outstanding_amount": "decimal",
+          "interest_rate": "decimal|null",
+          "emi_amount": "decimal|null",
+          "tenure_months": "integer|null",
+          "remaining_tenure_months": "integer|null",
+          "account_open_date": "date",
+          "account_close_date": "date|null",
+          "days_past_due": "integer",
+          "last_payment_date": "date|null",
+          "last_payment_amount": "decimal|null",
+          "collateral_type": "string|null",
+          "collateral_value": "decimal|null",
+          "report_date": "date"
+        }
+      },
+
+      "credit_enquiries": {
+        "description": "Credit enquiry history",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "enquiry_id": "string",
+          "customer_id": "string",
+          "bureau": "string",
+          "lender_id": "string",
+          "enquiry_type": "string",
+          "requested_amount": "decimal|null",
+          "enquiry_date": "date",
+          "status": "string"
+        }
+      },
+
+      "loans": {
+        "description": "Synthetic loan contracts",
+        "storage": "HDFS",
+        "format": "parquet",
+        "partition_by": ["loan_type", "start_date"],
+        "schema": {
+          "loan_id": "string",
+          "customer_id": "string",
+          "lender_id": "string",
+          "loan_type": "string",
+          "loan_status": "string",
+          "application_id": "string|null",
+          "principal_amount": "decimal",
+          "outstanding_amount": "decimal",
+          "interest_rate": "decimal",
+          "emi_amount": "decimal",
+          "tenure_months": "integer",
+          "remaining_tenure_months": "integer",
+          "start_date": "date",
+          "maturity_date": "date",
+          "next_due_date": "date|null",
+          "days_past_due": "integer",
+          "collateral_type": "string|null",
+          "collateral_value": "decimal|null",
+          "purpose": "string|null",
+          "currency": "string"
+        }
+      },
+
+      "loan_applications": {
+        "description": "Historical loan application records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "application_id": "string",
+          "customer_id": "string",
+          "lender_id": "string",
+          "loan_type": "string",
+          "requested_amount": "decimal",
+          "requested_tenure_months": "integer",
+          "application_channel": "string",
+          "application_date": "timestamp",
+          "application_status": "string",
+          "approved_amount": "decimal|null",
+          "rejection_reason": "string|null",
+          "credit_score_at_application": "integer|null",
+          "interest_rate_offered": "decimal|null"
+        }
+      },
+
+      "loan_payments": {
+        "description": "Historical loan repayment records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "payment_id": "string",
+          "loan_id": "string",
+          "customer_id": "string",
+          "payment_date": "date",
+          "due_amount": "decimal",
+          "paid_amount": "decimal",
+          "days_late": "integer",
+          "payment_status": "string",
+          "payment_method": "string"
+        }
+      },
+
+      "bank_accounts": {
+        "description": "Customer bank account master records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "account_id": "string",
+          "customer_id": "string",
+          "bank_id": "string",
+          "account_type": "string",
+          "account_status": "string",
+          "currency": "string",
+          "opening_date": "date",
+          "closing_date": "date|null",
+          "current_balance": "decimal",
+          "average_monthly_balance": "decimal",
+          "branch_code": "string|null"
+        }
+      },
+
+      "insurance_policies": {
+        "description": "Customer insurance policy records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "policy_id": "string",
+          "customer_id": "string",
+          "insurer_id": "string",
+          "policy_type": "string",
+          "policy_status": "string",
+          "policy_number": "string",
+          "premium_amount": "decimal",
+          "premium_frequency": "string",
+          "sum_assured": "decimal",
+          "coverage_amount": "decimal",
+          "deductible": "decimal|null",
+          "start_date": "date",
+          "expiry_date": "date",
+          "renewal_date": "date|null",
+          "payment_status": "string",
+          "currency": "string"
+        }
+      },
+
+      "insurance_claims": {
+        "description": "Historical insurance claims",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "claim_id": "string",
+          "policy_id": "string",
+          "customer_id": "string",
+          "claim_type": "string",
+          "claim_amount": "decimal",
+          "claim_date": "date",
+          "claim_status": "string",
+          "settled_amount": "decimal|null",
+          "settlement_date": "date|null"
+        }
+      },
+
+      "vehicles": {
+        "description": "Customer vehicle ownership records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "vehicle_id": "string",
+          "customer_id": "string",
+          "vehicle_type": "string",
+          "manufacturer": "string",
+          "model": "string",
+          "manufacture_year": "integer",
+          "purchase_date": "date|null",
+          "estimated_value": "decimal",
+          "fuel_type": "string",
+          "registration_country": "string"
+        }
+      },
+
+      "properties": {
+        "description": "Synthetic property ownership records",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "property_id": "string",
+          "customer_id": "string",
+          "property_type": "string",
+          "ownership_type": "string",
+          "estimated_value": "decimal",
+          "purchase_value": "decimal|null",
+          "purchase_date": "date|null",
+          "city": "string",
+          "country": "string"
+        }
+      },
+
+      "employments": {
+        "description": "Historical and current employment information",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "employment_id": "string",
+          "customer_id": "string",
+          "employer_name": "string",
+          "industry": "string",
+          "job_title": "string",
+          "employment_type": "string",
+          "annual_income": "decimal",
+          "currency": "string",
+          "start_date": "date",
+          "end_date": "date|null",
+          "employment_status": "string"
+        }
+      },
+
+      "lenders": {
+        "description": "Financial institution master data",
+        "storage": "HDFS",
+        "format": "json",
+        "schema": {
+          "lender_id": "string",
+          "lender_name": "string",
+          "lender_type": "string",
+          "country": "string",
+          "license_type": "string|null",
+          "status": "string"
+        }
+      },
+
+      "insurers": {
+        "description": "Insurance company master data",
+        "storage": "HDFS",
+        "format": "json",
+        "schema": {
+          "insurer_id": "string",
+          "insurer_name": "string",
+          "insurer_type": "string",
+          "country": "string",
+          "status": "string"
+        }
+      },
+
+      "banks": {
+        "description": "Bank master data",
+        "storage": "HDFS",
+        "format": "json",
+        "schema": {
+          "bank_id": "string",
+          "bank_name": "string",
+          "bank_type": "string",
+          "country": "string",
+          "currency": "string",
+          "status": "string"
+        }
+      },
+
+      "campaigns": {
+        "description": "Marketing campaign master data",
+        "storage": "HDFS",
+        "format": "json",
+        "schema": {
+          "campaign_id": "string",
+          "campaign_name": "string",
+          "campaign_type": "string",
+          "product_type": "string",
+          "channel": "string",
+          "start_date": "date",
+          "end_date": "date|null",
+          "target_country": "string",
+          "status": "string"
+        }
+      },
+
+      "customer_consents": {
+        "description": "Synthetic consent and communication preferences",
+        "storage": "HDFS",
+        "format": "parquet",
+        "schema": {
+          "consent_id": "string",
+          "customer_id": "string",
+          "consent_type": "string",
+          "consent_status": "string",
+          "channel": "string",
+          "purpose": "string",
+          "effective_from": "timestamp",
+          "effective_until": "timestamp|null",
+          "source": "string",
+          "updated_at": "timestamp"
+        }
+      },
+
+      "daily_customer_snapshot": {
+        "description": "Daily customer financial snapshot used for analytics and historical tracking",
+        "storage": "HDFS",
+        "format": "parquet",
+        "partition_by": ["snapshot_date"],
+        "schema": {
+          "snapshot_date": "date",
+          "customer_id": "string",
+          "credit_score": "integer",
+          "total_outstanding": "decimal",
+          "total_credit_limit": "decimal",
+          "credit_utilization_ratio": "decimal",
+          "monthly_emi": "decimal",
+          "monthly_income": "decimal",
+          "average_monthly_balance": "decimal",
+          "active_loans": "integer",
+          "active_policies": "integer",
+          "delinquency_count": "integer",
+          "days_since_last_loan_application": "integer|null",
+          "days_until_insurance_expiry": "integer|null"
+        }
+      }
+    },
+
+    "streaming": {
+
+      "bank_transactions": {
+        "description": "Real-time synthetic banking transactions",
+        "kafka_topic": "bank.transactions",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "account_id": "string",
+          "transaction_id": "string",
+          "transaction_type": "string",
+          "amount": "decimal",
+          "currency": "string",
+          "merchant_id": "string|null",
+          "merchant_name": "string|null",
+          "merchant_category": "string|null",
+          "channel": "string",
+          "location": "string|null",
+          "balance_after": "decimal"
+        }
+      },
+
+      "customer_behavior_events": {
+        "description": "Real-time digital behavior events",
+        "kafka_topic": "customer.behavior",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "session_id": "string",
+          "device_id": "string",
+          "channel": "string",
+          "event_type": "string",
+          "page": "string|null",
+          "product": "string|null",
+          "campaign_id": "string|null",
+          "source": "string|null",
+          "device_type": "string",
+          "ip_country": "string",
+          "metadata": "object"
+        }
+      },
+
+      "loan_events": {
+        "description": "Real-time loan lifecycle events",
+        "kafka_topic": "loan.events",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "loan_id": "string|null",
+          "application_id": "string|null",
+          "event_type": "string",
+          "loan_type": "string",
+          "amount": "decimal|null",
+          "status": "string|null",
+          "channel": "string",
+          "metadata": "object"
+        }
+      },
+
+      "insurance_events": {
+        "description": "Real-time insurance lifecycle and customer interaction events",
+        "kafka_topic": "insurance.events",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "policy_id": "string|null",
+          "event_type": "string",
+          "policy_type": "string",
+          "premium_amount": "decimal|null",
+          "channel": "string",
+          "metadata": "object"
+        }
+      },
+
+      "credit_events": {
+        "description": "Real-time credit-related events",
+        "kafka_topic": "credit.events",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "bureau": "string",
+          "event_type": "string",
+          "credit_score": "integer|null",
+          "score_change": "integer|null",
+          "enquiry_count": "integer|null",
+          "metadata": "object"
+        }
+      },
+
+      "marketing_events": {
+        "description": "Real-time marketing engagement events",
+        "kafka_topic": "marketing.events",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "campaign_id": "string",
+          "event_type": "string",
+          "channel": "string",
+          "product": "string",
+          "message_id": "string|null",
+          "device_id": "string|null",
+          "metadata": "object"
+        }
+      },
+
+      "customer_profile_updates": {
+        "description": "Customer profile change events simulating CDC",
+        "kafka_topic": "customer.cdc",
+        "schema": {
+          "event_id": "string",
+          "event_time": "timestamp",
+          "customer_id": "string",
+          "operation": "string",
+          "changed_fields": "object",
+          "source_system": "string"
+        }
+      }
+    }
+  },
+
+  "reference_values": {
+
+    "credit_bureaus": [
+      "CIBIL",
+      "EXPERIAN",
+      "EQUIFAX",
+      "CRIF_HIGH_MARK",
+      "TRANSUNION",
+      "SYNTHETIC_BUREAU"
+    ],
+
+    "loan_types": [
+      "PERSONAL_LOAN",
+      "HOME_LOAN",
+      "AUTO_LOAN",
+      "EDUCATION_LOAN",
+      "BUSINESS_LOAN",
+      "CONSUMER_LOAN",
+      "CREDIT_CARD",
+      "MORTGAGE",
+      "DEBT_CONSOLIDATION"
+    ],
+
+    "insurance_types": [
+      "LIFE",
+      "HEALTH",
+      "AUTO",
+      "HOME",
+      "TRAVEL",
+      "PROPERTY",
+      "BUSINESS"
+    ],
+
+    "employment_types": [
+      "SALARIED",
+      "SELF_EMPLOYED",
+      "BUSINESS_OWNER",
+      "CONTRACTOR",
+      "FREELANCER",
+      "RETIRED",
+      "STUDENT",
+      "UNEMPLOYED"
+    ],
+
+    "bank_account_types": [
+      "SAVINGS",
+      "CURRENT",
+      "CHECKING",
+      "SALARY",
+      "BUSINESS"
+    ],
+
+    "customer_channels": [
+      "WEB",
+      "MOBILE_APP",
+      "BRANCH",
+      "CALL_CENTER",
+      "PARTNER",
+      "API"
+    ],
+
+    "loan_application_status": [
+      "STARTED",
+      "SUBMITTED",
+      "UNDER_REVIEW",
+      "APPROVED",
+      "REJECTED",
+      "CANCELLED",
+      "DISBURSED"
+    ],
+
+    "loan_status": [
+      "ACTIVE",
+      "CLOSED",
+      "DEFAULTED",
+      "WRITTEN_OFF",
+      "RESTRUCTURED"
+    ],
+
+    "transaction_types": [
+      "CREDIT",
+      "DEBIT",
+      "TRANSFER",
+      "ATM_WITHDRAWAL",
+      "CARD_PAYMENT",
+      "UPI",
+      "DIRECT_DEBIT",
+      "SALARY",
+      "INTEREST",
+      "FEE"
+    ],
+
+    "behavior_events": [
+      "LOGIN",
+      "LOAN_PAGE_VIEW",
+      "LOAN_CALCULATOR",
+      "LOAN_APPLICATION_START",
+      "LOAN_APPLICATION_SUBMIT",
+      "LOAN_APPLICATION_ABANDON",
+      "CREDIT_SCORE_VIEW",
+      "INSURANCE_PAGE_VIEW",
+      "INSURANCE_QUOTE",
+      "INSURANCE_APPLICATION_START",
+      "INSURANCE_APPLICATION_SUBMIT",
+      "EMI_CALCULATOR",
+      "DEBT_CALCULATOR",
+      "PROFILE_UPDATE"
+    ],
+
+    "marketing_events": [
+      "CAMPAIGN_SENT",
+      "CAMPAIGN_DELIVERED",
+      "CAMPAIGN_OPENED",
+      "CAMPAIGN_CLICKED",
+      "CAMPAIGN_BOUNCED",
+      "CAMPAIGN_UNSUBSCRIBED",
+      "LEAD_CREATED",
+      "LEAD_ACCEPTED",
+      "LEAD_REJECTED",
+      "CONVERSION"
+    ],
+
+    "credit_event_types": [
+      "CREDIT_SCORE_UPDATED",
+      "NEW_CREDIT_ACCOUNT",
+      "CREDIT_ACCOUNT_CLOSED",
+      "CREDIT_ENQUIRY",
+      "DELINQUENCY_REPORTED",
+      "PAYMENT_REPORTED",
+      "CREDIT_LIMIT_CHANGED"
+    ]
+  }
+}
