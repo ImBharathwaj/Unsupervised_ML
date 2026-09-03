@@ -2,12 +2,23 @@
 
 The streaming module serves lightweight synthetic event data over HTTP using only the Python standard library.
 
+Two server variants are available:
+
+- `streaming_generator.py`: base streaming server
+- `deepseek_python_streaming.py`: same REST server pattern with stable `customer_phone` added to events that contain `customer_id`
+
 ## Start
 
-Run the server from the repo root:
+Run the base server from the repo root:
 
 ```bash
 python3 streaming_generator.py
+```
+
+Run the phone-enriched variant:
+
+```bash
+python3 deepseek_python_streaming.py
 ```
 
 Default address:
@@ -22,12 +33,17 @@ Optional environment overrides:
 STREAMING_HOST=127.0.0.1 STREAMING_PORT=8882 STREAMING_RATE=1 python3 streaming_generator.py
 ```
 
+```bash
+STREAMING_HOST=127.0.0.1 STREAMING_PORT=8882 STREAMING_RATE=1 STREAMING_SEED=42 python3 deepseek_python_streaming.py
+```
+
 Available environment variables:
 
 - `STREAMING_HOST`: bind host, default `127.0.0.1`
 - `STREAMING_PORT`: bind port, default `8882`
 - `STREAMING_RATE`: events per second, default `1`
 - `STREAMING_SCHEMA`: schema file path, default `schema.json`
+- `STREAMING_SEED`: random seed for the deepseek variant, default `42`
 
 ## Stop
 
@@ -40,7 +56,7 @@ Ctrl+C
 If it is running in the background, find and stop it with:
 
 ```bash
-ps -ef | grep streaming_generator.py
+ps -ef | grep 'streaming_generator.py\|deepseek_python_streaming.py'
 kill <pid>
 ```
 
@@ -102,6 +118,14 @@ Stream a limited number of events from one dataset:
 curl -N "http://127.0.0.1:8882/events/credit_events?limit=3"
 ```
 
+Example for the phone-enriched variant:
+
+```bash
+curl -N "http://127.0.0.1:8882/events/customer_behavior_events?limit=1"
+```
+
+That response includes `customer_phone` inside `payload`.
+
 ## Dataset Paths
 
 - `/events/bank_transactions`
@@ -122,3 +146,5 @@ Each line is a complete event envelope with:
 - `emitted_at`
 - `sequence`
 - `payload`
+
+For `deepseek_python_streaming.py`, `payload` also includes `customer_phone` whenever the event has a `customer_id`.
